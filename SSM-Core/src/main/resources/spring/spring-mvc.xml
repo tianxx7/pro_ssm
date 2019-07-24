@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--配置springMVC-->
+    <!--1.开启springMVC注解模式-->
+    <!--简化配置:
+            1).自动注册DefaultAnnotationHandlerMapping,AnnotationMethodHandler
+            2).提供一些列:数据绑定,数字和日期的format,@NumberFormat,@DateTimeFormat,xml,json默认读写支持
+    -->
+    <mvc:annotation-driven/>
+    <context:annotation-config/>
+    <!--开启自动扫描-->
+    <!--<context:component-scan base-package="cn.txx">
+        &lt;!&ndash;可以制定扫描规则&ndash;&gt;
+        &lt;!&ndash;Filter&ndash;&gt;
+        &lt;!&ndash;includeFilters  useDefaultFilters = false&ndash;&gt;
+        &lt;!&ndash;excludeFilters&ndash;&gt;
+    </context:component-scan>-->
+
+    <context:component-scan base-package="cn.app.controller">
+        <!--可以制定扫描规则-->
+        <!--Filter-->
+        <!--includeFilters  useDefaultFilters = false-->
+        <!--excludeFilters-->
+        <!--<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>-->
+    </context:component-scan>
+
+   <bean id="commonsMultipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+       <!--设置默认编码-->
+       <property name="defaultEncoding" value="UTF-8"/>
+       <!--设定文件上传的最大值为5M 5*1024*1024-->
+       <property name="maxUploadSize" value="5242880"/>
+       <!--设定文件上传时写入内存的最大值,如果小于这个参数不会生成临时文件,默认是10240-->
+       <property name="maxInMemorySize" value="40960"/>
+       <!--上传文件的临时路径-->
+       <property name="uploadTempDir" value="fileUpload/temp"/>
+       <!--延迟文件解析-->
+       <property name="resolveLazily" value="true"/>
+   </bean>
+
+    <!-- 静态资源处理  css js imgs -->
+    <!--
+    当过滤器配置url-parma是/时,防止过滤静态文件
+    -->
+   <!-- <mvc:resources location="/resources/**" mapping="/resources"/>-->
+
+    <!--2.定义跳转的文件的前后缀,视图模式配置-->
+   <!-- <mvc:default-servlet-handler/>-->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/jsp/"></property>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 启动SpringMVC的注解功能，完成请求和注解POJO的映射 -->
+    <bean
+            class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <ref bean="mappingJacksonHttpMessageConverter" /> <!-- JSON转换器 -->
+            </list>
+        </property>
+    </bean>
+
+    <!--避免IE执行AJAX时，返回JSON出现下载文件 如果报415 不支持的媒体类型 就是缺少jackson的包 -->
+    <bean id="mappingJacksonHttpMessageConverter"
+          class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>text/html;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--配置上传文件-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 默认编码 -->
+        <property name="defaultEncoding" value="utf-8" />
+        <!-- 文件大小最大值 -->
+        <property name="maxUploadSize" value="10485760000" />
+        <!-- 内存中的最大值 -->
+        <property name="maxInMemorySize" value="40960" />
+    </bean>
+</beans>
